@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volume Grid</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 5px;
+            max-width: 600px;
+        }
+        .box {
+            width: 50px;
+            height: 50px;
+            background-color: #3498db;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+        }
+        .box:hover {
+            background-color: #2980b9;
+        }
+        .revealed {
+            background-color: #2ecc71;
+        }
+        .audio-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .volume-display {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .info {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Volume Grid Game</h1>
+        <div class="info">
+            Click on any box to reveal a random number (1-100).<br>
+            The revealed number will set the audio volume percentage!
+        </div>
+        
+        <div class="audio-controls">
+            <audio id="audioPlayer" controls>
+                <source src="https://cdn.freesound.org/previews/506/506095_9034351-lq.mp3" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+            <div class="volume-display">Volume: <span id="volumeValue">50</span>%</div>
+        </div>
+        
+        <div class="grid" id="grid"></div>
+        
+        <button id="resetButton">Reset Grid</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const grid = document.getElementById('grid');
+            const audioPlayer = document.getElementById('audioPlayer');
+            const volumeValue = document.getElementById('volumeValue');
+            const resetButton = document.getElementById('resetButton');
+            
+            // Set initial volume
+            audioPlayer.volume = 0.5;
+            volumeValue.textContent = '50';
+            
+            // Generate unique random numbers from 1 to 100
+            function generateRandomNumbers() {
+                const numbers = Array.from({length: 100}, (_, i) => i + 1);
+                // Shuffle the array using Fisher-Yates algorithm
+                for (let i = numbers.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+                }
+                return numbers;
+            }
+            
+            // Create the grid with boxes
+            function createGrid() {
+                grid.innerHTML = '';
+                const randomNumbers = generateRandomNumbers();
+                
+                for (let i = 0; i < 100; i++) {
+                    const box = document.createElement('div');
+                    box.className = 'box';
+                    box.dataset.value = randomNumbers[i];
+                    box.addEventListener('click', revealBox);
+                    box.innerHTML = '?';
+                    grid.appendChild(box);
+                }
+            }
+            
+            // Reveal the box when clicked
+            function revealBox(event) {
+                const box = event.target;
+                if (!box.classList.contains('revealed')) {
+                    const value = parseInt(box.dataset.value);
+                    box.textContent = value;
+                    box.classList.add('revealed');
+                    
+                    // Set the audio volume based on the revealed number
+                    const volume = value / 100;
+                    audioPlayer.volume = volume;
+                    volumeValue.textContent = value;
+                }
+            }
+            
+            // Reset the grid
+            resetButton.addEventListener('click', function() {
+                createGrid();
+                // Reset volume to 50%
+                audioPlayer.volume = 0.5;
+                volumeValue.textContent = '50';
+            });
+            
+            // Initialize the grid
+            createGrid();
+        });
+    </script>
+</body>
+</html>
